@@ -1,4 +1,4 @@
-[
+{
     {
         "Active": "False",
         "Case Number": "INC0010001",
@@ -809,4 +809,4 @@
         "Resolution code": "Fixed",
         "Resolution notes": "Overloads due to excessive parallel processing tasks. Evaluated and redistributed tasks to balance load effectively."
     }
-]
+}
