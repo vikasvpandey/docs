@@ -1,5 +1,9 @@
-#this is a test py file
-def sum_num(num1, num2):
-  return num1+num2
-result=sum_num(10)
-print(result)
+def calculate_sum(numbers):
+    if not all(isinstance(n, (int, float)) for n in numbers):
+        raise ValueError('All elements must be numbers')
+    return sum(numbers)
+
+# Example code correction
+numbers = [1, 2, 3, 4, 5]
+result = calculate_sum(numbers)
+print('The sum is:', result)
