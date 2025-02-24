@@ -1,3 +1,2 @@
 sum function is in test.py
-multiply function is in main.py
-chainlit, llm runnables ask_question etc are in app.py
+chainlit, llm runnables ask_question etc are in main.py
