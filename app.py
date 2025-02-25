@@ -1,3 +1,4 @@
+
 import chainlit as cl
 import logging
 from appconfig import AppConfig
@@ -563,4 +564,133 @@ async def plot_charts(df, chart_type):
                 cl.Plotly(name="chart", figure=fig, display="inline", size="large")
             ]
         ).send()
+
+
+async def ask_user_message(content, timeout=20):
+    print(f"Asking user message: {content} with timeout: {timeout}")
+    memory = cl.user_session.get("memory")
+    memory.chat_memory.add_ai_message(content)
+    try:
+        response = await cl.AskUserMessage(content=content, timeout=timeout).send()
+        if response and 'output' in response:
+            return response
+        else:
+            logging.warning("Response does not contain 'output'.")
+            return {'output': None}
+    except TimeoutError:
+        logging.error("User response timeout occurred.")
+        return {'output': None}
+    def clean_numeric(cls, value):
+        if isinstance(value, str):
+            #remove $ and , characters
+            cleaned_value = value.replace("$", "").replace(",", "").strip()
+            
+            # Handling percentages by removing % and converting to float
+            if "%" in cleaned_value:
+                return float(cleaned_value.replace("%", "").strip())
+            try:
+                ##convert the clean value to an int
+                return int(cleaned_value)
+            except ValueError:
+                raise ValueError(f"Invalid cost value: {value}")
+        return value
+
+class RoiTableList(BaseModel):
+    __root__: List[RoiTableSchema]
+
+
+async def parse_markdown_to_dataframe(response: str):
+    """
+    Parses a markdown response into a DataFrame.
+
+    Args:
+        response (str): The markdown text to parse.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the parsed data.
+
+    Raises:
+        ValidationError: If the response fails validation.
+        Exception: For any other processing errors.
+    """
+    # Define the PydanticOutputParser and PromptTemplate logic here
+    parser = PydanticOutputParser(pydantic_object=RoiTableList)
+
+    prompt = PromptTemplate(
+        template=(
+            "Extract the ROI Analysis table from the markdown input and return each row as JSON."
+            "Ensure the keys match this structure: 'Category', 'Component', 'Cost', 'Calculations', 'Assumptions'."
+            "Ensure numeric fields (Cost, Break_even_months) are integers without formatting (no $ or commas).\n"
+            "{markdown_input}\n"
+        ),
+        input_variables=["markdown_input"],
+    )
+
+    # Use global ai_model instead of model
+    chain = prompt | ai_model | parser
+
+    try:
+        # Process the markdown input through the chain
+        result = await chain.ainvoke({"markdown_input": response})
+        
+        # Ensure the result is a list
+        if isinstance(result, dict):
+            result = [result]  # Wrap single dict in a list
+
+
+        # Convert result to a DataFrame
+        data = [item.dict() for item in result.__root__]
+        df = pd.DataFrame(data)
+        print("dataframe:",df)
+        return df
+    except ValidationError as e:
+        print("Validation error:", e)
+        return pd.DataFrame()  # Return an empty DataFrame in case of validation errors
+
+    except Exception as e:
+        print("Error:", e)
+        return pd.DataFrame()  # Return an empty DataFrame in case of other errors
+
+
+
+###############################################################################################
+
+##creating plotly graphs
+
+async def plot_charts(df, chart_type):
+    """
+    Generate Plotly charts (bar, line, pie) based on the provided DataFrame.
+    """
+    print("plot chart started")
+    if chart_type == 'bar':
+        filtered_df = df[~df['Category'].isin(['Breakeven Analysis', 'ROI Calculation'])]
+        fig = px.bar(
+            filtered_df,
+            x='Category',
+            y='Cost',
+            color='Component',
+            title='Cost Distribution by the Category and Component',
+            text='Cost',
+            barmode='group',
+            text_auto=True,
+        )
+        print("before fig update")
+        fig.update_layout(
+            yaxis_title="Cost ($)",
+            xaxis_title="Category",
+            legend_title='Component'
+        )
+        fig.update_traces(
+            width=0.60,
+            opacity=0.8
+        )
+        
+        # Send chart as a separate message without content
+        await cl.Message(
+            content="",  # Empty content to avoid expandable section
+            elements=[
+                cl.Plotly(name="chart", figure=fig, display="inline", size="large")
+            ]
+        ).send()
+
 
