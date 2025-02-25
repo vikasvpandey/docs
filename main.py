@@ -2,6 +2,17 @@ import chainlit as cl
 import logging
 from appconfig import AppConfig
 from azureai import AzureAI
+// ... existing imports ...
+
+# Initialize Azure AI model as a global variable
+try:
+    ai_model = AzureAI(env).get_client()
+except Exception as e:
+    logging.error(f"Failed to initialize AzureAI model: {e}")
+import chainlit as cl
+import logging
+from appconfig import AppConfig
+from azureai import AzureAI
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough, RunnableLambda
@@ -1138,3 +1149,23 @@ async def plot_charts(df, chart_type):
                 cl.Plotly(name="chart", figure=fig, display="inline", size="large")
             ]
         ).send()
+
+async def process_idea():
+    print("Processing user idea.")
+    await send_message("Thank you for sharing your idea.")
+    response = await ask_action("Are you ready to answer a few questions to understand the case?", ["yes", "no"])
+    if response == "yes":
+        try:
+            runnable = cl.user_session.get("runnable")
+            if runnable:
+                content = runnable.invoke({"input": user_idea})
+            else:
+                raise ValueError("Runnable not initialized.")
+            // ... existing code to handle content ...
+        except json.JSONDecodeError as e:
+            logging.error(f"Error decoding JSON: {e}")
+            questions = []
+        except Exception as e:
+            logging.error(f"An error occurred while processing idea: {e}")
+            questions = []
+    // ... existing else block ...
