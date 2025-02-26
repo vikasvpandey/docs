@@ -1,0 +1,1 @@
+Check service logs for errors: `journalctl -u hana-service`, Restart service: `systemctl restart hana-service`, Validate service health: `hana-cli check`
