@@ -30,33 +30,52 @@ def create_system_prompt(docs: list) -> str:
     """
 
 def create_issue_classifier_agent():
-    """Creates an agent that classifies issues as code-related or environment-related"""
+    """Creates an agent that classifies issues as code-related or environment-related based on comprehensive analysis."""
     system_prompt = """
     You are an expert issue classifier who determines if an issue requires code fixes or environment/DevOps fixes.
-    
-    When analyzing an issue:
-    1. Look for keywords and patterns indicating:
+    Always analyze with precision by checking for:
        - Code issues: bugs, syntax errors, logic errors, performance issues, memory leaks
-       - Environment issues: deployment failures, scaling issues, configuration problems, resource constraints, 
-         connectivity issues, permission issues, infrastructure problems
-    
-    2. Respond with a JSON object only:
+       - Environment issues: deployment failures, scaling issues, configuration problems, resource constraints, connectivity issues, permission issues, infrastructure problems
+    Respond with a JSON object evaluating the issue:
     {
         "issue_type": "code" or "environment",
-        "confidence": float between 0-1,
-        "reasoning": "brief explanation",
-        "suggested_approach": "specific suggestion for resolution"
+        "confidence": float between 0.7-1,
+        "reasoning": "detailed explanation of the analysis",
+        "suggested_approach": "recommended solution"
     }
-    
-    3. Be decisive - always classify as either "code" or "environment"
+    Be precise in classification: strictly choose 'code' or 'environment'
     """
-    
     return AssistantAgent(
         name="issue_classifier",
         model_client=get_ai_client(),
         system_message=system_prompt
     )
 
+async def get_classification(agent: AssistantAgent, prompt: str) -> Dict:
+    """Helper function to get classification from agent, now with improved error handling and response verification"""
+    classification_response = ""
+    last_response = ""
+    try:
+        async for chunk in agent.run_stream(task=prompt):
+            if hasattr(chunk, 'messages') and chunk.messages:
+                for message in chunk.messages:
+                    if message.source == 'assistant':
+                        last_response = message.content
+            elif hasattr(chunk, 'content') and chunk.content:
+                last_response = chunk.content
+            elif isinstance(chunk, str):
+                classification_response += chunk
+        # Use the last response if available, otherwise use accumulated response
+        response = last_response if last_response else classification_response
+        # Process and validate the response with enhanced checks
+        response = process_agent_response(response)
+        return json.loads(response)
+    except json.JSONDecodeError as e:
+        logging.error(f"Invalid JSON in classification response: {e}")
+        raise Exception("Failed to decode classification JSON")
+    except Exception as e:
+        logging.error(f"Error in classification: {str(e)}")
+        raise
 class AutoRemediation:
     def __init__(self):
         self.github = Github(GITHUB_TOKEN)
