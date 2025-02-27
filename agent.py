@@ -190,12 +190,16 @@ async def get_classification(agent: AssistantAgent, prompt: str) -> Dict:
         
         # Process and validate the response
         response = process_agent_response(response)
-        return json.loads(response)
+        classification_data = json.loads(response)
+        
+        # Add additional logging for debugging purposes
+        logging.info(f'Classification result: {classification_data}')
+        
+        return classification_data
         
     except Exception as e:
         logging.error(f"Error in classification: {str(e)}")
         raise
-
 def process_agent_response(response: str) -> str:
     """Helper function to process and validate agent responses"""
     if not response or response.isspace():
