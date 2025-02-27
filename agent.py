@@ -133,7 +133,55 @@ async def handle_servicenow_ticket(ticket_data: Dict) -> Dict:
         classifier_agent = create_issue_classifier_agent()
         
         # Get classification
-        classification_prompt = f"""Analyze this issue and classify it as code or environment related:
+        classification_prompt = f"""Analyze this issue and classify it as code or environment related:\nTitle: {ticket_data.get('short_description')}\nDescription: {ticket_data.get('description')}"""
+        
+        logging.info(f"Classification prompt: {classification_prompt}")
+        
+        # Improved error handling for classification
+        try:
+            classification_result = await get_classification(classifier_agent, classification_prompt)
+        except Exception as e:
+            logging.error(f"Failed to classify issue type: {str(e)}")
+            return {
+                "success": False,
+                "message": "Issue classification failed.",
+                "error": str(e)
+            }
+
+        # Choose appropriate fix method based on classification
+        try:
+            if classification_result['issue_type'] == 'code':
+                logging.info("Processing as code issue")
+                remediation_result = await auto_remediate.analyze_and_fix_issue(
+                    github_issue['issue_number']
+                )
+            else:  # environment issue
+                logging.info("Processing as environment issue")
+                remediation_result = await auto_remediate.analyze_and_fix_env_issue(
+                    github_issue['issue_number']
+                )
+        except Exception as e:
+            logging.error(f"Error during remediation process: {str(e)}")
+            return {
+                "success": False,
+                "message": "Remediation process failed.",
+                "error": str(e)
+            }
+        
+        return {
+            "success": True,
+            "github_issue": github_issue,
+            "classification": classification_result,
+            "remediation_result": remediation_result
+        }
+        
+    except Exception as e:
+        logging.error(f"Error in auto-remediation process: {str(e)}")
+        logging.error(f"Full error context: {str(e.__class__.__name__)}: {str(e)}")
+        return {
+            "success": False,
+            "message": f"Auto-remediation failed: {str(e)}"
+        }
 Title: {ticket_data.get('short_description')}
 Description: {ticket_data.get('description')}"""
         
