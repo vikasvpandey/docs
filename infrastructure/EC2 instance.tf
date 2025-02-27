@@ -1,0 +1,1 @@
+Reboot the instance if stuck, check for further issues through AWS Console or CLI
