@@ -1138,3 +1138,17 @@ async def plot_charts(df, chart_type):
                 cl.Plotly(name="chart", figure=fig, display="inline", size="large")
             ]
         ).send()
+
+async def ask_question(index:int, questions: list):
+    '''
+    Getting response object for the question asked. 
+    If the json and the key value output present, then it
+    moves onto the on_answer function, else it goes to the cancel function
+    '''
+    if index < len(questions):
+        print(f"Asking question {index}: {questions[index]['question']}")
+        response = await ask_user_message(questions[index]["question"], timeout=120)
+        if response and 'output' in response:
+            await on_answer(questions, index, response["output"])
+        else:
+            await on_cancel(questions, index)
