@@ -1138,3 +1138,23 @@ async def plot_charts(df, chart_type):
                 cl.Plotly(name="chart", figure=fig, display="inline", size="large")
             ]
         ).send()
+
+async def ask_question(index: int, questions: list):
+    '''
+    Enhanced to gracefully handle scenarios where questions might not be coming correctly.
+    The function will now verify the presence of the 'question' key and handle absence.
+    '''
+    if index < len(questions):
+        question_text = questions[index].get('question', None)
+        if question_text:
+            print(f"Asking question {index}: {question_text}")
+            response = await ask_user_message(question_text, timeout=120)
+            if response and 'output' in response:
+                await on_answer(questions, index, response['output'])
+            else:
+                await on_cancel(questions, index)
+        else:
+            print(f"Missing 'question' key at index {index}")
+            await on_cancel(questions, index)
+    else:
+        print("No more questions to ask.")
