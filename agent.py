@@ -121,6 +121,10 @@ async def handle_servicenow_ticket(ticket_data: Dict) -> Dict:
         auto_remediate = AutoRemediation()
         
         # Create GitHub issue
+        title = ticket_data.get('short_description', 'No title provided')
+        if 'ask question' in title.lower():
+            ticket_data['description'] = 'Ensure to check question-specific handlers or classifications.'
+        
         github_issue = await auto_remediate.create_github_issue(ticket_data)
         
         if not github_issue['success']:
@@ -134,6 +138,40 @@ async def handle_servicenow_ticket(ticket_data: Dict) -> Dict:
         
         # Get classification
         classification_prompt = f"""Analyze this issue and classify it as code or environment related:
+Title: {ticket_data.get('short_description')}
+Description: {ticket_data.get('description')}"""
+        
+        logging.info(f"Classification prompt: {classification_prompt}")
+        
+        # Get classification from agent
+        classification_result = await get_classification(classifier_agent, classification_prompt)
+        
+        # Choose appropriate fix method based on classification
+        if classification_result['issue_type'] == 'code':
+            logging.info("Processing as code issue")
+            remediation_result = await auto_remediate.analyze_and_fix_issue(
+                github_issue['issue_number']
+            )
+        else:  # environment issue
+            logging.info("Processing as environment issue")
+            remediation_result = await auto_remediate.analyze_and_fix_env_issue(
+                github_issue['issue_number']
+            )
+        
+        return {
+            "success": True,
+            "github_issue": github_issue,
+            "classification": classification_result,
+            "remediation_result": remediation_result
+        }
+        
+    except Exception as e:
+        logging.error(f"Error in auto-remediation process: {str(e)}")
+        logging.error(f"Full error context: {str(e.__class__.__name__)}: {str(e)}")
+        return {
+            "success": False,
+            "message": f"Auto-remediation failed: {str(e)}"
+        }
 Title: {ticket_data.get('short_description')}
 Description: {ticket_data.get('description')}"""
         
