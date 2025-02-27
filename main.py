@@ -1138,3 +1138,32 @@ async def plot_charts(df, chart_type):
                 cl.Plotly(name="chart", figure=fig, display="inline", size="large")
             ]
         ).send()
+
+async def ask_question(index: int, questions: list):
+    '''
+    Getting response object for the question asked. 
+    If the JSON and the key value output are present, then it
+    moves on to the on_answer function, else it goes to the cancel function.
+    Detailed logging has been added for better traceability and error handling.
+    '''
+    if index < len(questions):
+        question_content = questions[index].get('question', '')
+        if not question_content:
+            print(f"No valid question at index {index}. Skipping question.")
+            await on_cancel(questions, index)
+            return
+
+        print(f"Asking question {index}: {question_content}")
+        try:
+            response = await ask_user_message(question_content, timeout=120)
+            if response and response.get('output'):
+                await on_answer(questions, index, response['output'])
+            else:
+                print(f"No response or invalid response received for question: {question_content}")
+                await on_cancel(questions, index)
+        except asyncio.TimeoutError:
+            print(f"Timeout occurred for question: {question_content}")
+            await on_cancel(questions, index)
+        except Exception as e:
+            print(f"Unexpected error while asking question: {str(e)}")
+            await on_cancel(questions, index)
