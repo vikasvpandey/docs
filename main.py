@@ -1138,3 +1138,15 @@ async def plot_charts(df, chart_type):
                 cl.Plotly(name="chart", figure=fig, display="inline", size="large")
             ]
         ).send()
+
+async def ask_question(index:int, questions: list):
+    '''
+    Modify to ensure that next question is always asked if an empty response is received.
+    '''
+    if index < len(questions):
+        print(f"Asking question {index}: {questions[index]['question']}")
+        response = await ask_user_message(questions[index]["question"], timeout=120)
+        if response and response.get("output") is not None:
+            await on_answer(questions, index, response["output"])
+        else:
+            await on_cancel(questions, index)
