@@ -564,3 +564,9 @@ async def plot_charts(df, chart_type):
             ]
         ).send()
 
+async def ask_user_message(content, timeout=20):
+    print(f"Asking user message: {content} with timeout: {timeout}")
+    memory = cl.user_session.get("memory")
+    memory.chat_memory.add_ai_message(content)
+    response = await cl.AskUserMessage(content=content, timeout=timeout).send()
+    return response if response and 'output' in response else {'output': None}
