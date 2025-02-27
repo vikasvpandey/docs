@@ -183,20 +183,24 @@ async def process_idea():
             await send_message('Your Case has been saved') if item_id is not None else send_message('There has been an error saving your message, hold on...')
 
 
-async def ask_question(index:int, questions: list):
+async def ask_question(index: int, questions: list):
     '''
-    Getting response object for the question asked. 
-    If the json and the key value output present, then it
+    Getting response object for the question asked.
+    If the JSON and the key value output present, then it
     moves onto the on_answer function, else it goes to the cancel function
-    '''
+    ''')
     if index < len(questions):
         print(f"Asking question {index}: {questions[index]['question']}")
-        response = await ask_user_message(questions[index]["question"], timeout=120)
-        if response and response["output"]:
-            await on_answer(questions, index, response["output"])
-        else:
-            await on_cancel(questions, index)
-
+        try:
+            response = await ask_user_message(questions[index]["question"], timeout=120)
+            if response and "output" in response:
+                await on_answer(questions, index, response["output"])
+            else:
+                await on_cancel(questions, index)
+        except (KeyError, json.JSONDecodeError) as e:
+            await send_message("Error processing your response. Let's try another question.")
+            logging.error(f"Error: {str(e)} in response: {response}")
+            await ask_question(index + 1, questions)
 async def on_answer(questions: list, index: int, answer: list):
     print(f"Received answer for question {index}: {answer}")
     memory = cl.user_session.get("memory")
