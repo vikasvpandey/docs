@@ -1,0 +1,1 @@
+aws ec2 modify-instance-attribute --instance-id <instance_id> --instance-type <desired_instance_type>
