@@ -10,6 +10,18 @@ from src.infrastructure_executor import InfrastructureExecutor
 from src.env_issue_handler import EnvironmentIssueHandler
 from src.code_issue_handler import CodeIssueHandler
 import json
+import os
+from github import Github
+import logging
+from typing import Dict, List
+import asyncio
+from config.appconfig import AppConfig
+from config.azureai import AzureAI
+from autogen_agentchat.agents import AssistantAgent
+from src.infrastructure_executor import InfrastructureExecutor
+from src.env_issue_handler import EnvironmentIssueHandler
+from src.code_issue_handler import CodeIssueHandler
+import json
 
 # Initialize configurations
 env = AppConfig()
@@ -217,3 +229,31 @@ def process_agent_response(response: str) -> str:
 
 if __name__ == "__main__":
     asyncio.run(handle_servicenow_ticket({"short_description": "I am not getting questions prompts"}))
+
+def process_agent_response(response: str) -> str:
+    """Helper function to process and validate agent responses"""
+    if not response or response.isspace():
+        raise Exception("Agent returned empty response")
+    
+    # Clean up the response
+    response = response.strip()
+    if response.startswith('```json'):
+        response = response[7:]
+    if response.endswith('```'):
+        response = response[:-3]
+    response = response.strip()
+    
+    # Validate the response
+    try:
+        json.loads(response)  # Try to parse JSON to ensure it's valid
+    except json.JSONDecodeError as e:
+        logging.error(f"JSON decoding error: {e}")
+        raise Exception("Invalid JSON from agent response") from e
+    
+    if response.startswith("Analyze this"):
+        raise Exception("Agent returned the prompt instead of a response")
+    
+    return response
+def get_ai_client():
+    return AzureAI(AppConfig()).get_client()
+
