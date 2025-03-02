@@ -1,3 +1,53 @@
-sum function is in test.py
-chainlit, llm runnables ask_question etc are in main.py
-agent.py contains information about agents
+- main.py contains 
+1. **FastAPI Application**: This code defines a FastAPI app with multiple POST endpoints for handling business case creation and refinement using AI-powered language models from Azure AI.
+2. **`/get_questions` Endpoint**: Accepts a query string, generates a prompt for a language model, and returns a list of generated questions related to the query.
+3. **`/get_usecase` Endpoint**: Accepts input data (either JSON or a string), processes it using a detailed prompt for business case creation, and returns the generated use case.
+4. **`/refine_usecase` Endpoint**: Accepts a request and a list of memory strings, refines a business case by passing it through a language model, and returns the updated business case and message history.
+5. **Message Conversion and Prompt Handling**: Utility functions convert memory lists to compatible message histories for the language model, and dynamic prompts are constructed using the `ChatPromptTemplate` to guide the model’s responses.
+
+- agents.py contains
+### Documentation for the Given Code
+
+The provided code is part of a system used for enterprise software project estimations, financial analysis, and cost breakdowns. Below is a short documentation for the key imports and functions:
+
+1. **Imports**:
+   - **Console**: Used for interacting with the system's UI.
+   - **RoundRobinGroupChat**: Facilitates collaborative chat between agents that work in a round-robin manner.
+   - **AssistantAgent**: Represents agents responsible for handling specific tasks like effort breakdown, cost estimation, and ROI analysis.
+   - **TextMentionTermination, MaxMessageTermination**: Conditions that trigger the termination of a chat based on certain text mention or message limits.
+   - **OpenAIChatCompletionClient, AzureAI**: Clients for integrating language models from OpenAI and Azure for various AI-based tasks.
+   - **FunctionTool**: Wraps business logic functions like cost estimation, ROI calculation, etc., to be used by agents.
+   - **LangChainTools**: Used to interface with language models like Google Serper API for advanced search capabilities.
+
+2. **Key Functions**:
+   - `compute_cost`: Calculates project cost based on hours, manpower, and hourly rate, applying contingency.
+   - `calculate_monthly_benefits`: Estimates monthly financial benefits from efficiency gains.
+   - `calculate_annual_benefits`: Estimates operational and support savings from efficiency improvements.
+   - `calculate_roi`: Computes return on investment (ROI) based on total cost and benefits.
+   - `calculate_payback_period`: Estimates the payback period for investments.
+   - `assess_complexity`: Evaluates project complexity based on system integrations, UI screens, and other factors.
+   - `convert_story_points_to_hours`: Converts agile story points into hours based on complexity.
+
+3. **Agents**:
+   - **Effort Breakdown Agent**: Analyzes project requirements, breaks them down into components, and calculates estimated hours and costs using various tools.
+   - **Cost and Savings Agent**: Uses the complexity assessment to adjust cost and benefit estimations.
+   - **Finance Analyst and ROI Agent**: Focuses on ROI and payback period calculations, adjusted for complexity factors.
+
+4. **Group Chat**:
+   - **RoundRobinGroupChat**: Facilitates communication between agents in a round-robin fashion, ensuring that each agent handles their specific tasks. The conversation will terminate once the "TERMINATE" condition is met.
+
+5. **Usage**:
+   - The code runs a sample query using the `run_group_chat` function, where agents collaborate to break down and estimate costs, benefits, and ROI for a project (e.g., migrating to a cloud-based ERP system).
+
+- app.py conatins
+### Documentation for the Script
+
+1. **Setup & Imports**: The script leverages several libraries, including `chainlit`, `langchain`, `azureai`, and `plotly`. It integrates with Azure's AI model, manages user interactions, and processes business ideas using conversational memory and action responses.
+   
+2. **AI Integration & Memory**: The Azure AI model is initialized globally for language processing. The memory system stores user inputs and question responses, enabling dynamic conversations and task processing.
+
+3. **User Interaction**: The chatbot prompts the user to submit their business idea, answer questions, and refine the business case. Responses are collected, stored, and utilized for generating a comprehensive business case.
+
+4. **Data Processing & ROI Visualization**: The script includes functionality to generate ROI tables, validate numerical inputs, and visualize the data using `Plotly` charts. It parses markdown responses into data frames and generates interactive plots based on cost data.
+
+5. **Error Handling & Persistence**: The script ensures robust error handling during data parsing, business case creation, and visualizations. It supports saving generated business cases and allows users to refine or save the output.
