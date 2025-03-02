@@ -440,10 +440,11 @@ async def run_group_chat(query: str):
             if isinstance(msg, TextMessage) and msg.source != "user":
                
                 # Check for termination message
-                if "TERMINATE" in msg.content:
+                if "TERMINATE" in msg.content.lower():  # Ensure keyword check is case-insensitive
                     print("\n=== Chat Terminated ===")
                     messages.append(msg.content)
                     print(msg.content)
+                    break  # Ensure the loop terminates on 'TERMINATE'
         return messages
             
     except Exception as e:
@@ -451,8 +452,6 @@ async def run_group_chat(query: str):
         import traceback
         print(traceback.format_exc())
         return []
-
-
 if __name__ == "__main__":
     # Test query
     sample_query = "Our retail chain wants to migrate from an on-prem ERP system to a cloud-based SAP solution"
