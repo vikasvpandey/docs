@@ -256,16 +256,17 @@ async def create_business_case():
     try:
         await send_message("Creating business case. Please wait")
         
-        # Prepare input for agents using collected data
+        # Prepare input with correctly structured data
         business_case_query = f"""
         User Idea: {user_idea}
         Collected Answers:
         {json.dumps(answers, indent=2)}
         
+        # Ensure detailed request for cost and savings analysis
         Please analyze this business case and provide:
         1. Comprehensive market analysis
         2. Effort estimation and resource planning
-        3. Financial projections and ROI analysis
+        3. Accurate financial projections with detailed savings and ROI analysis
         """
 
         # Use agentic framework instead of direct LLM call
@@ -278,10 +279,6 @@ async def create_business_case():
 
     except Exception as err:
         print(f"An error occurred: {err}")
-
-
-
-
 ###################################################################################################
 
 ## ROI Visualization
