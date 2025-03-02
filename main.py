@@ -19,10 +19,16 @@ azure = AzureAI(env)
 
 async def create_runnable(prompt, model):
     print("Creating runnable for prompt.")
-    model = AzureAI(env).get_client()
-    return prompt | model | StrOutputParser()
+    # Add exception handling
+    try:
+        client = model or AzureAI(env).get_client()
+        result = prompt | client | StrOutputParser()
+    except Exception as e:
+        logging.error(f"Error during runnable creation in main app: {e}")
+        raise
+    return result
 
-
+# Refactor to accept an optional model and fallback to a default to improve flexibility
 from langchain.schema import BaseMessage, HumanMessage, SystemMessage
 
 async def convert_to_message_history(memory_list: list[str]):
