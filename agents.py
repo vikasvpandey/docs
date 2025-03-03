@@ -176,7 +176,7 @@ class StoryPoint(BaseModel):
     complexity: str = "low"  # low, medium, high
 
 def convert_story_points_to_hours(story_point: StoryPoint) -> float:
-    """Converts story points to hours based on complexity"""
+    """Converts story points to hours with detailed complexity adjustments"""
     base_hours = {
         1: 4, 2: 8, 3: 12, 5: 20, 8: 32, 13: 52
     }
@@ -185,8 +185,13 @@ def convert_story_points_to_hours(story_point: StoryPoint) -> float:
         "medium": 1.5,
         "high": 2.0
     }
-    return base_hours.get(story_point.points, 4) * complexity_multiplier.get(story_point.complexity, 1.0)
-
+    # Enhance logic to accommodate specific case scenarios
+    # Example: Add custom multipliers as per team feedback, project type, or domain
+    adjusted_multiplier = complexity_multiplier.get(story_point.complexity, 1.0)
+    # Custom adjustments (e.g., based on domain-specific feedback)
+    domain_specific_adjustments = 1.1  # example adjust value, can vary by implementation specifics
+    adjusted_hours = base_hours.get(story_point.points, 4) * adjusted_multiplier * domain_specific_adjustments
+    return adjusted_hours
 story_points_tool = FunctionTool(
     convert_story_points_to_hours,
     description="Converts story points to hours considering complexity"
