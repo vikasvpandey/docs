@@ -1,0 +1,1 @@
+aws ec2 modify-volume --volume-id <volume-id> --size <new-size>
