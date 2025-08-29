@@ -1,0 +1,1 @@
+aws ec2 modify-instance-attribute --instance-id <instance-id> --attribute <attribute-name> --value <value>
