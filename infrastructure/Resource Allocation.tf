@@ -1,0 +1,1 @@
+cf scale <app-name> -m 512M -i 2

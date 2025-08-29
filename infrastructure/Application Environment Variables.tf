@@ -1,0 +1,1 @@
+cf set-env <app-name> <ENV_VAR> <VALUE>
