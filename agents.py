@@ -26,12 +26,13 @@ model = get_model()
 
 
 # Define functions for CostCalculator methods
-def compute_cost(effort_hours: float, manpower: int, hourly_rate: float = 50, contingency: float = 0.2) -> float:
-    base_cost = effort_hours * manpower * hourly_rate
+def compute_cost(effort_hours: float, manpower: int, hourly_rate: float = 50, contingency: float = 0.2, complexity_factor: float = 1.0) -> float:
+    base_cost = effort_hours * manpower * hourly_rate * complexity_factor
     total_cost = base_cost * (1 + contingency)
-    
     return total_cost
 
+# Additional logic to calculate correct complexity factor based on project details
+# Assuming a complexity_factor variable is fed from the context where compute_cost is called
 def calculate_monthly_benefits(
     user_count: int = 100,  # Default to 100 users
     efficiency_gain: float = 0.3,  # 30% efficiency gain (common for digital transformation)
