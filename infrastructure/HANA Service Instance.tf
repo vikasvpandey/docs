@@ -1,0 +1,1 @@
+Review and update auto-remediation scripts to handle all HANA exceptions; implement detailed logging and notification for all steps.
