@@ -20,8 +20,14 @@ import asyncio
 
     
 def get_model():
-    return AzureAI(AppConfig()).get_client_autogen()
+    app_config = AppConfig()
+    model_client = AzureAI(app_config).get_client_autogen()
+    # Ensure configuration options are loaded correctly
+    if not model_client:
+        raise ValueError('Model client initialization failed. Check AzureAI and AppConfig settings.')
+    return model_client
 
+model = get_model()
 model = get_model()
 
 
