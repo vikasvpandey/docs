@@ -96,9 +96,15 @@ async def send_message(content):
 
 async def create_runnable(prompt, input_key):
     print("Creating runnable for prompt.")
-    # Use global model instead of creating new instance
-    return prompt | ai_model | StrOutputParser()
+    # Add exception handling to ensure stability
+    try:
+        result = prompt | ai_model | StrOutputParser()
+    except Exception as e:
+        logging.error(f"Error creating runnable: {e}")
+        raise
+    return result
 
+# Ensure ai_model is initialized correctly to avoid new instance creation each time
 @cl.on_chat_start
 async def on_chat_start():
     print("Chat started.")
