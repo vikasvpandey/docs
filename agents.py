@@ -434,25 +434,22 @@ async def run_group_chat(query: str):
     try:
         messages = []
         stream = group_chat.run_stream(task=query)
-       
-        # Process all messages in the stream
+        # Ensure handling of all necessary message responses
         async for msg in stream:
             if isinstance(msg, TextMessage) and msg.source != "user":
-               
-                # Check for termination message
+                # Improved message termination check
                 if "TERMINATE" in msg.content:
                     print("\n=== Chat Terminated ===")
                     messages.append(msg.content)
-                    print(msg.content)
+                else:
+                    # Capture relevant non-termination messages
+                    messages.append(msg.content)
         return messages
-            
     except Exception as e:
         print(f"Error occurred: {str(e)}")
         import traceback
         print(traceback.format_exc())
         return []
-
-
 if __name__ == "__main__":
     # Test query
     sample_query = "Our retail chain wants to migrate from an on-prem ERP system to a cloud-based SAP solution"
