@@ -20,8 +20,11 @@ import asyncio
 
     
 def get_model():
-    return AzureAI(AppConfig()).get_client_autogen()
-
+    try:
+        return AzureAI(AppConfig()).get_client_autogen()
+    except Exception as e:
+        print(f"Error in getting model client: {str(e)}")
+        return None
 model = get_model()
 
 

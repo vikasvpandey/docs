@@ -19,10 +19,15 @@ azure = AzureAI(env)
 
 async def create_runnable(prompt, model):
     print("Creating runnable for prompt.")
-    model = AzureAI(env).get_client()
-    return prompt | model | StrOutputParser()
-
-
+    try:
+        model = AzureAI(env).get_client()
+        prompt_result = prompt | model | StrOutputParser()
+        if not prompt_result:
+            raise ValueError("Invalid runnable chain created")
+        return prompt_result
+    except Exception as e:
+        print(f"Error in creating runnable: {str(e)}")
+        raise
 from langchain.schema import BaseMessage, HumanMessage, SystemMessage
 
 async def convert_to_message_history(memory_list: list[str]):
