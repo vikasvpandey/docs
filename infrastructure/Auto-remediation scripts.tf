@@ -1,0 +1,1 @@
+Review and update auto-remediation scripts: Inspect logs of last script execution, Test scripts manually to ensure they resolve the issue
