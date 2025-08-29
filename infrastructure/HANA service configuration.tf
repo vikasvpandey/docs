@@ -1,0 +1,1 @@
+Use a configuration management tool like Ansible or Chef to define correct parameters
