@@ -1,0 +1,1 @@
+sed -i 's/auto_remediate=false/auto_remediate=true/' /etc/agent/config.ini
