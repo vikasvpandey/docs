@@ -175,8 +175,8 @@ class StoryPoint(BaseModel):
     points: int = 1  # 1, 2, 3, 5, 8, 13
     complexity: str = "low"  # low, medium, high
 
-def convert_story_points_to_hours(story_point: StoryPoint) -> float:
-    """Converts story points to hours based on complexity"""
+def convert_story_points_to_hours(story_point: StoryPoint, adjustment_factor: float = 1.0) -> float:
+    """Converts story points to hours based on complexity and an optional adjustment factor"""
     base_hours = {
         1: 4, 2: 8, 3: 12, 5: 20, 8: 32, 13: 52
     }
@@ -185,8 +185,13 @@ def convert_story_points_to_hours(story_point: StoryPoint) -> float:
         "medium": 1.5,
         "high": 2.0
     }
-    return base_hours.get(story_point.points, 4) * complexity_multiplier.get(story_point.complexity, 1.0)
+    hours = base_hours.get(story_point.points, 4) * complexity_multiplier.get(story_point.complexity, 1.0)
+    return hours * adjustment_factor
 
+story_points_tool = FunctionTool(
+    convert_story_points_to_hours,
+    description="Converts story points to hours considering complexity and allows an adjustment factor"
+)
 story_points_tool = FunctionTool(
     convert_story_points_to_hours,
     description="Converts story points to hours considering complexity"
