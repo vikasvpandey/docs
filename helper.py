@@ -48,11 +48,15 @@ async def send_message(content):
     await cl.Message(content=content).send()
 
 async def create_runnable(prompt, input_key):
-    print("Creating runnable for prompt.")
-    model = AzureAI(env).get_client()
-    return prompt | model | StrOutputParser()
-
-
+    print('Creating runnable for prompt.')
+    try:
+        model = AzureAI(env).get_client()
+        if model is None:
+            raise ValueError('Model is not properly initialized.')
+        return prompt | model | StrOutputParser()
+    except Exception as e:
+        print(f'Error during runnable creation: {e}')
+        raise
 async def save_case_generated(user_idea: str, case_generated: str, item_id):
     request_body = {
             "user_idea": user_idea,
