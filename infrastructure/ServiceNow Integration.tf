@@ -1,0 +1,1 @@
+Update ServiceNow API integration to include detailed error messages and context from scripts.

@@ -1,0 +1,1 @@
+Review and test scripts in a staging environment with logging enabled. Implement error handling and alerting.

@@ -1,0 +1,1 @@
+Access the instance configuration via CLI/API and compare with expected configuration. Update any mismatches.
