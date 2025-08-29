@@ -1,0 +1,1 @@
+aws ec2 modify-instance-attribute --instance-id i-xxxxxx --attribute autoRecovery --value enabled
